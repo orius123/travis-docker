@@ -37,7 +37,7 @@ fi
     test "${QUIET}" -eq 0 && set -x
     sudo "${UMLDIR}/linux" \
 	quiet \
-	mem=1G \
+	mem=2G \
 	rootfstype=hostfs rw \
 	eth0=slirp,,"${SLIRPBIN}" \
 	"init=${UMLDIR}/linux-init" \
