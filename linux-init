@@ -54,8 +54,27 @@ mount -t sysfs none /sys
 mkdir -p /var/run
 mount -t tmpfs none /var/run
 
-# takes the pain out of cgroups
-cgroups-mount
+# If cgroup is mounted by fstab, don't run
+# Don't get too smart - bail on any uncommented entry with 'cgroup' in it
+if grep -v '^#' /etc/fstab | grep -q cgroup; then
+	echo "cgroups mounted from fstab, not mounting /sys/fs/cgroup"
+	exit 0
+fi
+
+# kernel provides cgroups?
+if [ ! -e /proc/cgroups ]; then
+	exit 0
+fi
+
+# Mount /sys/fs/cgroup if not already done
+mountpoint -q /sys/fs/cgroup || mount -t ext3 -o uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup
+
+# get list of cgroup controllers
+for d in `sed -e '1d;s/\([^\t]\)\t.*$/\1/' /proc/cgroups`; do
+	mkdir -p /sys/fs/cgroup/$d
+	mountpoint -q /sys/fs/cgroup/$d || (mount -n -t cgroup -o $d cgroup /sys/fs/cgroup/$d || rmdir /sys/fs/cgroup/$d || true)
+done
+
 
 # mount backen[5~d
 case ${DOCKER_BACKEND_FS} in
