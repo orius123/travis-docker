@@ -67,7 +67,7 @@ if [ ! -e /proc/cgroups ]; then
 fi
 
 # Mount /sys/fs/cgroup if not already done
-mountpoint -q /sys/fs/cgroup || mount -t ext3 -o uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup
+mountpoint -q /sys/fs/cgroup || mount -t tmpfs -o size=128m,uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup
 
 # get list of cgroup controllers
 for d in `sed -e '1d;s/\([^\t]\)\t.*$/\1/' /proc/cgroups`; do
